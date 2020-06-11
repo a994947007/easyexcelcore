@@ -15,5 +15,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Entity{
+    /**
+     * 对应在excel表中sheet
+     * @return
+     */
     String value() default "";
+
+    /**
+     * 对应一个excel文件
+     * @return
+     */
+    String [] path();
 }

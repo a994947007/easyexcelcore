@@ -1,0 +1,26 @@
+<configuration>
+    <properties>
+        <!--开启驼峰命名，默认开启-->
+        <property name="mapUnderscoreToCamelCase" value="true"></property>
+        <!--配置了该标签，表示在test包下扫描所有加了注解的类-->
+        <property name="scanPackage" value="test"></property>
+    </properties>
+
+
+
+
+
+
+    <!---->
+    <resources>
+        <resource name = "path" value = "D:/交易数据.xls" class="">
+        </resource>
+
+        <resource name = "path" value = "D:/员工表.xls" class="text.Employee">
+            <colum name = "id" type="Integer"/>
+            <colum name = "name" type="String"/>
+            <colum name = "salary" type="Float"/>
+            <colum name = "department" type = "double"/>
+        </resource>
+    </resources>
+</configuration>

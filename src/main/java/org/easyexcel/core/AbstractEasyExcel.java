@@ -2,10 +2,9 @@ package org.easyexcel.core;
 
 import org.easyexcel.io.XMLScanner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import java.io.File;
 
 /**
  * @author luyao
@@ -16,7 +15,7 @@ import java.util.Map;
  */
 public abstract class AbstractEasyExcel {
     /**
-     * 存放Excel行数据对象
+     * 存放Excel类数据对象
      */
     protected List<Class<?>> classes = new ArrayList<Class<?>>();
 
@@ -38,21 +37,52 @@ public abstract class AbstractEasyExcel {
      * 初始化Container
      */
     protected void initContainer(){
-
+        scanPackages();
+        instance();
+        di();
     }
 
     /**
      * 扫描包，加载所有类
      */
     protected void scanPackages(){
+        ApplicationConfig config = ApplicationConfig.getInstance();
+        List<String> packages = config.getConfig("properties_property_scanPackage");
+        for (String pkg : packages) {
+            scanPackage(pkg);
+        }
+    }
 
+    /**
+     * 扫描一个包
+     * @param packageName
+     */
+    private void scanPackage(String packagePath){
+        String path = packagePath.replaceAll("\\.", "/");       //将所有.换成/
+        File f = new File(AbstractEasyExcel.class.getClassLoader().getResource(path).getFile());
+        Stack<File> fileStack = new Stack<File>();
+        fileStack.push(f);
+        while (!fileStack.isEmpty()){
+            File file = fileStack.pop();
+            if(file.isDirectory()){
+                fileStack.push(file);
+            }else if(file.isFile() && file.getName().endsWith(".class")){
+                String className = file.getName().substring(0,file.getName().lastIndexOf("."));
+                try {
+                    Class<?> clazz = Class.forName(className.replaceAll("/","\\.") + "." + className);
+                    classes.add(clazz);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
      * 扫描所有类，将加了注解的类构造对象保存到容器中
      */
     protected void instance(){
-
+        
     }
 
     /**
@@ -61,4 +91,8 @@ public abstract class AbstractEasyExcel {
     protected void di(){
 
     }
+
+    public abstract int add();
+    public abstract int remove();
+    public abstract int update();
 }
