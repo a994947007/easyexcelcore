@@ -155,9 +155,9 @@ public abstract class AbstractEasyExcel {
                                 String value = annotation.value();
                                 String name = null;
                                 if(value == null || value.equals("")){
-                                    name = value;
+                                    name = field.getName();
                                 }else{
-                                    name = field.getName();         //没有配置Field的value属性时，默认开启驼峰命名
+                                    name = value;         //没有配置Field的value属性时，默认开启驼峰命名
                                 }
                                 Integer col_index = header.get(name);
                                 if(col_index != null){          //匹配时才注入
@@ -170,6 +170,8 @@ public abstract class AbstractEasyExcel {
                                         field.set(o,row.getCell(col_index).toString());
                                     }else if(fieldType.toString().equals("class java.lang.Double")){
                                         field.set(o,row.getCell(col_index).getNumericCellValue());
+                                    }else if(fieldType.toString().equals("class java.lang.Long")){
+                                        field.set(o,(long)row.getCell(col_index).getNumericCellValue());
                                     }
                                 }
                             }

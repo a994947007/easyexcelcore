@@ -14,10 +14,10 @@ public class TestData {
     @FieldName
     private Double fromScore;
     @FieldName
-    private Integer gasLimit;
+    private Long gasLimit;
     @FieldName("gasPrice（Gwei）")
-    private Integer gasPriceGwei;
-    @FieldName
+    private Long gasPriceGwei;
+    @FieldName("gasPrice（ETH）")
     private Integer gasPriceETH;
 
     public String getBlock() {
@@ -52,19 +52,19 @@ public class TestData {
         this.fromScore = fromScore;
     }
 
-    public Integer getGasLimit() {
+    public Long getGasLimit() {
         return gasLimit;
     }
 
-    public void setGasLimit(Integer gasLimit) {
+    public void setGasLimit(Long gasLimit) {
         this.gasLimit = gasLimit;
     }
 
-    public Integer getGasPriceGwei() {
+    public Long getGasPriceGwei() {
         return gasPriceGwei;
     }
 
-    public void setGasPriceGwei(Integer gasPriceGwei) {
+    public void setGasPriceGwei(Long gasPriceGwei) {
         this.gasPriceGwei = gasPriceGwei;
     }
 

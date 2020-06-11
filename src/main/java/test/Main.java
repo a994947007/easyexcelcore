@@ -10,6 +10,7 @@ public class Main {
         List<TestData> datas = easyExcel.get(TestData.class);
         for (TestData data : datas) {
             System.out.println(data);
+            System.out.println("---------------------------------------------");
         }
     }
 }
