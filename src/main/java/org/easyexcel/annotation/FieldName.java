@@ -19,5 +19,5 @@ public @interface FieldName {
      * 对应在excel表中的列名
      * @return
      */
-    String value();
+    String value() default "";
 }

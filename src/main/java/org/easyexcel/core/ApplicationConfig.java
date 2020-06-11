@@ -30,11 +30,13 @@ public class ApplicationConfig {
         List<String> configValues = config.get(name);
         if(configValues == null){
             configValues = new ArrayList<String>();
+            configValues.add(value);
+            config.put(name,configValues);
+            return;
         }
         if(!configValues.contains(configValues)){
             configValues.add(value);
         }
-        config.put(name,configValues);
     }
 
     public List<String> getConfig(String name){

@@ -19,11 +19,10 @@ public @interface Entity{
      * 对应在excel表中sheet
      * @return
      */
-    String value() default "";
-
+    int sheet() default 0;
     /**
      * 对应一个excel文件
      * @return
      */
-    String [] path();
+    String path();
 }

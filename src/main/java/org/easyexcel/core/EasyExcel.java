@@ -1,22 +1,26 @@
 package org.easyexcel.core;
 
+import java.util.List;
+
 public class EasyExcel extends AbstractEasyExcel{
     public EasyExcel(String url) {
         super(url);
     }
 
-    @Override
-    public int add() {
-        return 0;
+    public <T> List<T> get(Class<?> clazz){
+        return (List<T>) entitryContainer.get(clazz.getCanonicalName());
     }
 
-    @Override
-    public int remove() {
-        return 0;
+    public void add(){
+
     }
 
-    @Override
-    public int update() {
-        return 0;
+    public void remove(){
+
     }
+
+    public void update(){
+
+    }
+
 }

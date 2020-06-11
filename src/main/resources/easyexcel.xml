@@ -11,7 +11,7 @@
 
 
 
-    <!---->
+    <!--
     <resources>
         <resource name = "path" value = "D:/交易数据.xls" class="">
         </resource>
@@ -23,4 +23,5 @@
             <colum name = "department" type = "double"/>
         </resource>
     </resources>
+    -->
 </configuration>

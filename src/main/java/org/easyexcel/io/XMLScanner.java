@@ -8,6 +8,9 @@ import org.dom4j.io.SAXReader;
 import org.easyexcel.core.ApplicationConfig;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -16,7 +19,7 @@ import java.util.Map;
  * 配置读写类，用于读写Excel数据配置，如excel文件路径，对象属性加载格式等
  */
 public class XMLScanner {
-    private java.io.File applicationXML;
+    private File applicationXML;
     public XMLScanner(String path){
         applicationXML = new File(path);
         init();
@@ -80,13 +83,12 @@ public class XMLScanner {
         public boolean handler(Element element) {
             if("properties".equals(element.getName())){
                 for(Iterator<Element> it = element.elementIterator();it.hasNext();){
-                    if("property".equals(element.getName())){
-                        for(Iterator<Attribute> attributes = element.attributeIterator(); attributes.hasNext();){
-                            Attribute attribute = attributes.next();
-                            String attrName = attribute.getName();
-                            String attrValue = attribute.getValue();
-                            ApplicationConfig.getInstance().addConfig("properties_property_" + attrName,attrValue);
-                        }
+                    Element ele = it.next();
+                    if("property".equals(ele.getName())){
+                        Iterator<Attribute>  attributes = ele.attributeIterator();
+                        String name = attributes.next().getValue();
+                        String value = attributes.next().getValue();
+                        ApplicationConfig.getInstance().addConfig("properties_property_" + name,value);
                     }
                 }
                 return true;
@@ -105,6 +107,27 @@ public class XMLScanner {
                 return true;
             }
             return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        SAXReader reader = new SAXReader();
+        try {
+            File file = null;
+            try {
+                file = new File(XMLScanner.class.getClassLoader().getResource("easyexcel.xml").toURI().getPath());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            System.out.println(file.getAbsolutePath());
+            try {
+                reader.read(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+           // reader.read(file);
+        } catch (DocumentException e) {
+            e.printStackTrace();
         }
     }
 }

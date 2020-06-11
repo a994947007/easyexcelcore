@@ -4,14 +4,38 @@ package test;
 import org.easyexcel.annotation.Entity;
 import org.easyexcel.annotation.FieldName;
 
-@Entity
+@Entity(sheet = 0,path="G:/Student.xls")
 public class Student {
+    @FieldName("s_id")
+    private Integer id;
+
+    @FieldName("s_age")
+    private Integer age;
+
     @FieldName("s_name")
     private String name;
 
-    @FieldName("s_age")
-    private int age;
+    public Integer getId() {
+        return id;
+    }
 
-    @FieldName("s_score")
-    private double score;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
