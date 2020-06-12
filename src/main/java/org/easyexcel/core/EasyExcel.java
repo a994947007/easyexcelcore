@@ -1,6 +1,14 @@
 package org.easyexcel.core;
 
-import java.util.List;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.easyexcel.annotation.FieldName;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class EasyExcel extends AbstractEasyExcel{
     public EasyExcel(String url ) {
@@ -13,35 +21,89 @@ public class EasyExcel extends AbstractEasyExcel{
     }
 
     /**
-     * 在Excel未开启自动装载时，该方法可手动装载一个类
+     * 从缓存中获取对应的对象
      * @param clazz
      * @param <T>
      * @return
      */
-    public <T> List<T> get(Class<?> clazz){
+    public <T> List<T> getFromCache(Class<?> clazz){
         List<String> list = ApplicationConfig.getInstance().getConfig("properties_property_useCache");
         String useCacheConfig = list.get(0);
         List<Object> results = null;
         if(useCacheConfig == null || "true".equals(useCacheConfig)){        //默认从缓存中读取
             results =  entitryContainer.get(clazz.getCanonicalName());
         }
+        return (List<T>) results;
+    }
+
+
+    /**
+     * 根据类装载对应的java对象
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> get(Class<?> clazz){
+        List<Object> results = getFromCache(clazz);
         if(results == null){
-            results =  excelParseByClass(clazz);
+            results =  excelParseByClass(clazz,new DefaultlExcelParser());
         }
         return (List<T>) results;
     }
 
-    
+    /**
+     * 根据类装载对应的java对象，并提供自定义解析器
+     * @param clazz
+     * @param excelParser
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> get(Class<?> clazz,ExcelParser excelParser) {
+        List<Object> results = getFromCache(clazz);
+        if(results == null){
+            results =  excelParseByClass(clazz,excelParser);
+        }
+        return (List<T>) results;
+    }
 
-    public void add(){
+
+    /**
+     * 添加到excel
+     * @param o
+     */
+    public void add(Object o){
+        System.out.println(o.getClass());
+    }
+
+    public void add(Object o,ExcelParser excelParser){
 
     }
 
-    public void remove(){
+    /**
+     * 添加到缓存
+     * @param o
+     */
+    public void addToCache(Object o){
+
+    }
+
+    /**
+     * 从excel中删除
+     */
+    public void remove(Object o){
+
+    }
+
+    /**
+     * 从缓存中删除
+     */
+    public void removeFromCache(Object o){
 
     }
 
     public void update(){
 
     }
+
+
 }

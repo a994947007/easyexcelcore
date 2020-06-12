@@ -20,4 +20,10 @@ public @interface FieldName {
      * @return
      */
     String value() default "";
+
+    /**
+     * 对应在excel表中的列号
+     * @return
+     */
+    int col() default -1;
 }
