@@ -4,6 +4,10 @@
         <property name="mapUnderscoreToCamelCase" value="true"></property>
         <!--配置了该标签，表示在test包下扫描所有加了注解的类-->
         <property name="scanPackage" value="test"></property>
+        <!--是否自动装载excel对象，不配置默认为false-->
+        <property name="autoLoad" value="false"></property>
+        <!--是否启用excel缓存，不配置默认为true-->
+        <property name="useCache" value="true"></property>
     </properties>
 
 

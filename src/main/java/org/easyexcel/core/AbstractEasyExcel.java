@@ -44,12 +44,15 @@ public abstract class AbstractEasyExcel {
      */
     private XMLScanner scanner = null;
 
-    public AbstractEasyExcel(String url){
+    public AbstractEasyExcel(String url ){
         try {
             scanner = new XMLScanner(AbstractEasyExcel.class.getClassLoader().getResource(url).toURI().getPath());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void load(){
         initContainer();
     }
 
@@ -122,14 +125,27 @@ public abstract class AbstractEasyExcel {
      */
     protected void di(){
         for (Class<?> entityClass : entityClasses) {
-            Entity annotation = entityClass.getAnnotation(Entity.class);
-            String excelPath = annotation.path();
-            ExcelReader reader = new ExcelReader(excelPath,entityClass);
-            List<Object> list = new UniversalExcelParser().parse(reader.read(),entityClass);
+            List<Object> list = excelParseByClass(entityClass);
             entitryContainer.put(entityClass.getCanonicalName(),list);
         }
     }
 
+    /**
+     * 根据类名解析Excel
+     * @param clazz
+     * @return
+     */
+    protected List<Object> excelParseByClass(Class<?> clazz){
+        Entity annotation = clazz.getAnnotation(Entity.class);
+        String excelPath = annotation.path();
+        ExcelReader reader = new ExcelReader(excelPath,clazz);
+        List<Object> list = new UniversalExcelParser().parse(reader.read(),clazz);
+        return list;
+    }
+
+    /**
+     * Excel通用解析器
+     */
     private static class UniversalExcelParser implements ExcelParser{
         public List<Object> parse(Workbook workbook,Class<?> clazz) {
             List<Object> list = new ArrayList<Object>();
