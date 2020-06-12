@@ -9,7 +9,7 @@ import org.easyexcel.exception.UnsupportFileTypeException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class ExcelWriter extends ExcelOperator{
+public class ExcelWriter extends AbstractExcelOperator {
     public ExcelWriter(String url) {
         super(url);
     }

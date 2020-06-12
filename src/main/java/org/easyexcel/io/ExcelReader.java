@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 
-public class ExcelReader extends ExcelOperator{
+public class ExcelReader extends AbstractExcelOperator {
     public ExcelReader(String url) {
         super(url);
     }

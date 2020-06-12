@@ -7,10 +7,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 
-public class ExcelOperator {
+public abstract class AbstractExcelOperator {
+    private static final String XLS = "xls";
+    private static final String XLSX = "xlsx";
     protected File excelFile = null;
     private Workbook wb = null;
-    public ExcelOperator(String url){
+    public AbstractExcelOperator(String url){
         excelFile = new File(url);
         init();
     }
