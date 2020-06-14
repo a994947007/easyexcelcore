@@ -8,7 +8,7 @@ import java.util.List;
  * 需完成以下内容
  * 1、增加根据col_index解析excel
  * 2、每个Entity无需一定要指定path
- * 完善ExcelWriter，ExcelParser
+ * 3、架构拆分，缓存、注入器、解析器、EasyExcel控制器
  * 参考：https://www.jb51.net/article/157349.htm
  *
  *
