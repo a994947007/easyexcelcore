@@ -5,11 +5,14 @@ import org.easyexcel.core.EasyExcel;
 import java.util.List;
 
 /**
- * 增加根据col_index解析excel
+ * 需完成以下内容
+ * 1、增加根据col_index解析excel
+ * 2、每个Entity无需一定要指定path
+ * 3、返回写出成功的行数
  * 完善ExcelWriter，ExcelParser
  * 参考：https://www.jb51.net/article/157349.htm
- * https://my.oschina.net/u/3897028/blog/2049488
- * https://www.jianshu.com/p/4354bab7b792
+ *
+ *
  */
 public class Main {
     public static void main(String[] args) {

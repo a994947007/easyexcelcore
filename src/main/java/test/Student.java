@@ -4,7 +4,7 @@ package test;
 import org.easyexcel.annotation.Entity;
 import org.easyexcel.annotation.FieldName;
 
-@Entity(sheet = 0,path="G:/Student.xls")
+@Entity(sheet = 0,path="D:/Student.xls")
 public class Student {
     @FieldName("s_id")
     private Integer id;

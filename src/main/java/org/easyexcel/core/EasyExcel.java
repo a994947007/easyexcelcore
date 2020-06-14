@@ -26,7 +26,7 @@ public class EasyExcel extends AbstractEasyExcel{
      * @param <T>
      * @return
      */
-    public <T> List<T> getFromCache(Class<?> clazz){
+    private <T> List<T> getFromCache(Class<?> clazz){
         List<String> list = ApplicationConfig.getInstance().getConfig("properties_property_useCache");
         String useCacheConfig = list.get(0);
         List<Object> results = null;
@@ -44,11 +44,7 @@ public class EasyExcel extends AbstractEasyExcel{
      * @return
      */
     public <T> List<T> get(Class<?> clazz){
-        List<Object> results = getFromCache(clazz);
-        if(results == null){
-            results =  excelParseByClass(clazz,new DefaultlExcelParser());
-        }
-        return (List<T>) results;
+       return get(clazz,new DefaultlExcelParser());
     }
 
     /**
@@ -71,20 +67,51 @@ public class EasyExcel extends AbstractEasyExcel{
      * 添加到excel
      * @param o
      */
+    public void add(List<Object> list){
+        add(list,new DefaultlExcelParser());
+    }
+
+    /**
+     * 添加单行
+     * @param o
+     */
     public void add(Object o){
-        System.out.println(o.getClass());
+        List<Object> list = new ArrayList<Object>();
+        list.add(o);
+        add(list);
+    }
+
+
+    public void add(List<Object> list,ExcelParser excelParser){
+        //写入到excel
+        addToExcel(list,excelParser);
+        //写入缓存
+        addToCache(list);
     }
 
     public void add(Object o,ExcelParser excelParser){
-
+        List<Object> list = new ArrayList<Object>();
+        list.add(o);
+        add(list,excelParser);
     }
 
     /**
      * 添加到缓存
      * @param o
      */
-    public void addToCache(Object o){
-
+    public void addToCache(List<Object> list){
+        List<String> configList = ApplicationConfig.getInstance().getConfig("properties_property_useCache");
+        String useCacheConfig = configList.get(0);
+        if(useCacheConfig == null || "true".equals(useCacheConfig)){        //默认从缓存中读取
+            if(list!= null && list.size() > 0){
+                Class<?> clazz = list.get(0).getClass();
+                if(entitryContainer.containsKey(clazz.getCanonicalName())){
+                    entitryContainer.get(clazz.getCanonicalName()).addAll(list);
+                }else{
+                    entitryContainer.put(clazz.getCanonicalName(),list);
+                }
+            }
+        }
     }
 
     /**

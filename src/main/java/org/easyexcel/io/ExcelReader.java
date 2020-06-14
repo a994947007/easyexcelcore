@@ -31,6 +31,15 @@ public class ExcelReader extends AbstractExcelOperator {
             e.printStackTrace();
         } catch (UnsupportFileTypeException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                if(fs!= null){
+                    fs.close();
+                    fs = null;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return wb;
     }

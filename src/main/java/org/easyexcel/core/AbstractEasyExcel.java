@@ -7,8 +7,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.easyexcel.annotation.Entity;
 import org.easyexcel.annotation.FieldName;
 import org.easyexcel.io.ExcelReader;
+import org.easyexcel.io.ExcelWriter;
 import org.easyexcel.io.XMLScanner;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
@@ -144,6 +146,16 @@ public abstract class AbstractEasyExcel {
         return list;
     }
 
+    protected void addToExcel(List<Object> list,ExcelParser excelParser){
+        if(list == null || list.size() == 0){
+            return;
+        }
+        Entity annotation = list.get(0).getClass().getAnnotation(Entity.class);
+        String excelPath = annotation.path();
+        ExcelWriter writer = new ExcelWriter(excelPath);
+        writer.write(excelParser.parse(list,writer.getWorkbook()));
+    }
+
     /**
      * Excel通用解析器
      */
@@ -153,7 +165,6 @@ public abstract class AbstractEasyExcel {
             private Map<Integer, String> indexToName = new HashMap<Integer, String>();
 
             public Header(Row firstRow) {
-                Map<String, Integer> header = new HashMap<String, Integer>();
                 Iterator<Cell> it = firstRow.iterator();
                 while (it.hasNext()) {
                     Cell cell = it.next();
@@ -176,6 +187,24 @@ public abstract class AbstractEasyExcel {
             return new Header(firstRow);
         }
 
+        private Header createHeader(Class<?> clazz,Row firstRow){
+            Field fields[] = clazz.getDeclaredFields();
+            int colIndex = 0;
+            for (Field field : fields) {
+                FieldName fieldName = field.getAnnotation(FieldName.class);
+                if(fieldName != null){
+                    String fieldValue = fieldName.value();
+                    Cell cell = firstRow.createCell(colIndex++);
+                    if(fieldValue != null && !fieldValue.equals("")){
+                        cell.setCellValue(fieldValue);
+                    }else{
+                        cell.setCellValue(field.getName());
+                    }
+                }
+            }
+            return new Header(firstRow);
+        }
+
         /**
          * 将java类对应的excel表解析成对象列表
          *
@@ -185,26 +214,127 @@ public abstract class AbstractEasyExcel {
          */
         public List<Object> parse(Workbook workbook, Class<?> clazz) {
             List<Object> list = new ArrayList<Object>();
-            Entity entity = clazz.getAnnotation(Entity.class);
-            Sheet sheet = workbook.getSheetAt(entity.sheet());
-            int firstRowNum = sheet.getFirstRowNum();
-            int lastRowNum = sheet.getLastRowNum();
-            Header header = getHeader(sheet.getRow(firstRowNum));
-            for (int i = firstRowNum + 1; i <= lastRowNum; i++) {
-                Row row = sheet.getRow(i);
-                if (row != null) {
-                    Object o = parseObejct(header, row, clazz);
-                    if (o != null) list.add(o);
+            try{
+                Entity entity = clazz.getAnnotation(Entity.class);
+                Sheet sheet = workbook.getSheetAt(entity.sheet());
+                int firstRowNum = sheet.getFirstRowNum();
+                int lastRowNum = sheet.getLastRowNum();
+                Header header = getHeader(sheet.getRow(firstRowNum));
+                for (int i = firstRowNum + 1; i <= lastRowNum; i++) {
+                    Row row = sheet.getRow(i);
+                    if (row != null) {
+                        Object o = parseObejct(header, row, clazz);
+                        if (o != null) list.add(o);
+                    }
+                }
+            }finally {
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             return list;
         }
 
-        public List<Row> parse(List<Object> list) {
-            List<Row> rows = new ArrayList<Row>();
-            return rows;
+        /**
+         * 将对象列表解析成Workbook表
+         * @param list
+         * @param workbook
+         * @return
+         */
+        public Workbook parse(List<Object> list, Workbook workbook) {
+            //根据list将Row添加到workbook最后
+            //先创建sheet
+            Class<?> clazz = list.get(0).getClass();
+            Entity entity = clazz.getAnnotation(Entity.class);
+            Sheet sheet = null;
+            if(workbook.getNumberOfSheets() > 0){
+                sheet = workbook.getSheetAt(entity.sheet());
+            }else{
+                sheet = workbook.createSheet();
+            }
+            int rowIndex = sheet.getPhysicalNumberOfRows();
+            //创建Header
+            Header header;
+            if(existsHeader(sheet,clazz)){
+                header = getHeader(sheet.getRow(sheet.getFirstRowNum()));
+            }else{
+                Row headRow = sheet.createRow(rowIndex++);
+                header = createHeader(clazz,headRow);
+            }
+            for (int i = 0; i < list.size(); i++) {
+                Object o = list.get(i);
+                if(o != null){
+                    Row row = sheet.createRow(rowIndex++);
+                    convertDataToRow(header,row,o);
+                }
+            }
+            return workbook;
         }
 
+        /**
+         * 判断是否存在Header，如果workbook中存在row，则可能存在header，可以将row中的数据和class的属性列表对应名对比进一步确认
+         * @return
+         */
+        private boolean existsHeader(Sheet sheet,Class<?> clazz){
+            if(sheet.getPhysicalNumberOfRows() == 0){
+                return false;
+            }else{
+                //拿到firstRow
+                Row firstRow = sheet.getRow(sheet.getFirstRowNum());
+                Header header = getHeader(firstRow);
+                Field fields[] = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    FieldName fieldName = field.getAnnotation(FieldName.class);
+                    String fieldValue = fieldName.value();
+                    String name;
+                    if(fieldValue != null && !fieldValue.equals("")){
+                        name = fieldValue;
+                    }else{
+                        name = field.getName();
+                    }
+                    if(header.getColIndex(name) == null){
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        private Row convertDataToRow(Header header,Row row ,Object o){
+            Class<?> clazz = o.getClass();
+            Field fields[] = clazz.getDeclaredFields();
+            try {
+                for (Field field : fields) {
+                    FieldName fieldName = field.getAnnotation(FieldName.class);
+                    if(fieldName != null){
+                        int colIndex = 0;
+                        String fieldValue = fieldName.value();
+                        if(fieldValue != null && !fieldValue.equals("")){
+                            colIndex = header.getColIndex(fieldValue);
+                        }else{
+                            colIndex = header.getColIndex(field.getName());
+                        }
+                        Cell cell = row.createCell(colIndex);
+                        field.setAccessible(true);
+                        Object value = field.get(o) == null? "":field.get(o);
+                        if(value instanceof Integer){
+                            cell.setCellValue((Integer)value);
+                        }else if(value instanceof String){
+                            cell.setCellValue(String.valueOf(value));
+                        }else if(value instanceof Long){
+                            cell.setCellValue((Long)value);
+                        }else if(value instanceof Double){
+                            cell.setCellValue((Double)value);
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            return row;
+        }
 
         private Object parseObejct(Header header, Row row, Class<?> clazz) {
             try {

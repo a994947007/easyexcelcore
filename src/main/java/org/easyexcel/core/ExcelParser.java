@@ -18,8 +18,8 @@ public interface ExcelParser {
     List<Object> parse(Workbook workbook,Class<?> clazz);
 
     /**
-     * 解析对象生成excel行
+     * 解析添加的对象生成Row添加到Workbook最后
      * @param list
      */
-    List<Row> parse(List<Object> list);
+    Workbook parse(List<Object> list,Workbook workbook);
 }
