@@ -20,9 +20,9 @@ public class ExcelReader extends AbstractExcelOperator {
         String path = excelFile.getPath();
         try {
             fs = new FileInputStream(excelFile.getAbsolutePath());
-            if(path.endsWith(".xlsx")){
+            if(path.endsWith(XLSX)){
                 wb = new XSSFWorkbook(fs);
-            }else if(path.endsWith(".xls")){
+            }else if(path.endsWith(XLS)){
                 wb = new HSSFWorkbook(fs);
             }else{
                 throw new UnsupportFileTypeException("不支持这种excel文件类型");

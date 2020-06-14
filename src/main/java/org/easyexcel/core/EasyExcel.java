@@ -81,7 +81,6 @@ public class EasyExcel extends AbstractEasyExcel{
         add(list);
     }
 
-
     public void add(List<Object> list,ExcelParser excelParser){
         //写入到excel
         addToExcel(list,excelParser);
@@ -118,6 +117,22 @@ public class EasyExcel extends AbstractEasyExcel{
      * 从excel中删除
      */
     public void remove(Object o){
+        List<Object> list = new ArrayList<Object>();
+        list.add(o);
+        remove(list);
+    }
+
+    public void remove(List<Object> list){
+        remove(list,new DefaultlExcelParser());
+    }
+
+    public void remove(Object o,ExcelParser parser){
+        List<Object> list = new ArrayList<Object>();
+        list.add(o);
+        remove(list,parser);
+    }
+
+    public void remove(List<Object> list,ExcelParser parser){
 
     }
 
@@ -128,9 +143,19 @@ public class EasyExcel extends AbstractEasyExcel{
 
     }
 
-    public void update(){
+    /**
+     * 在excel中更改，src改成dst，可匹配多行
+     * @param  src 原excel中的内容
+     * @param  dst 被改之后的内容
+     */
+    public void update(Object dst,Object src){
 
     }
 
+    /**
+     * 清空excel
+     */
+    public void clear(){
 
+    }
 }

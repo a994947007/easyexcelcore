@@ -59,9 +59,9 @@ public class ExcelWriter extends AbstractExcelOperator {
         try {
             if(excelFile.exists()){
                 fis = new FileInputStream(excelFile);
-                if(path.endsWith(".xlsx")){
+                if(path.endsWith(XLSX)){
                     wb = new XSSFWorkbook(fis);
-                }else if(path.endsWith(".xls")){
+                }else if(path.endsWith(XLS)){
                     wb = new HSSFWorkbook(fis);
                 }else{
                     throw new UnsupportFileTypeException("不支持这种excel文件类型");

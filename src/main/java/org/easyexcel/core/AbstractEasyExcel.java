@@ -146,6 +146,11 @@ public abstract class AbstractEasyExcel {
         return list;
     }
 
+    /**
+     * 将对象列表添加到excel中
+     * @param list
+     * @param excelParser
+     */
     protected void addToExcel(List<Object> list,ExcelParser excelParser){
         if(list == null || list.size() == 0){
             return;
@@ -154,6 +159,16 @@ public abstract class AbstractEasyExcel {
         String excelPath = annotation.path();
         ExcelWriter writer = new ExcelWriter(excelPath);
         writer.write(excelParser.parse(list,writer.getWorkbook()));
+    }
+
+    protected void removeFromExcel(List<Object> list,ExcelParser excelParser){
+        if(list == null || list.size() == 0){
+            return;
+        }
+        Entity entity = list.get(0).getClass().getAnnotation(Entity.class);
+        String excelPath = entity.path();
+        ExcelWriter reader = new ExcelWriter(excelPath);
+
     }
 
     /**
@@ -181,7 +196,6 @@ public abstract class AbstractEasyExcel {
                 return indexToName.get(index);
             }
         }
-
 
         private Header getHeader(Row firstRow) {
             return new Header(firstRow);
@@ -302,6 +316,13 @@ public abstract class AbstractEasyExcel {
             }
         }
 
+        /**
+         * 将一个object对象的属性装载到Row中
+         * @param header
+         * @param row
+         * @param o
+         * @return
+         */
         private Row convertDataToRow(Header header,Row row ,Object o){
             Class<?> clazz = o.getClass();
             Field fields[] = clazz.getDeclaredFields();
@@ -336,6 +357,13 @@ public abstract class AbstractEasyExcel {
             return row;
         }
 
+        /**
+         * 将Row解析成Object
+         * @param header
+         * @param row
+         * @param clazz
+         * @return
+         */
         private Object parseObejct(Header header, Row row, Class<?> clazz) {
             try {
                 java.lang.Object o = clazz.newInstance();

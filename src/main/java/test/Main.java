@@ -8,7 +8,6 @@ import java.util.List;
  * 需完成以下内容
  * 1、增加根据col_index解析excel
  * 2、每个Entity无需一定要指定path
- * 3、返回写出成功的行数
  * 完善ExcelWriter，ExcelParser
  * 参考：https://www.jb51.net/article/157349.htm
  *

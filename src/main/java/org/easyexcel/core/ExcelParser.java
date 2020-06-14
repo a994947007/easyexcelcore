@@ -1,11 +1,11 @@
 package org.easyexcel.core;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;
 
 /**
+ * @author luyao
  * 解析Excel格式，数据
  */
 public interface ExcelParser {
