@@ -1,5 +1,7 @@
 package org.easyexcel.core;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.List;
  */
 public interface ExcelParser {
     /**
-     * 解析类生成对象列表
+     * 将Workbook解析成java对象
      * @param workbook
      * @param clazz
      * @return
@@ -18,8 +20,16 @@ public interface ExcelParser {
     List<Object> parse(Workbook workbook,Class<?> clazz);
 
     /**
-     * 解析添加的对象生成Row添加到Workbook最后
+     * 将java对象列表解析成Workbook，并加到原有Workbook内容最后
      * @param list
      */
     Workbook parse(List<Object> list,Workbook workbook);
+
+    /**
+     * 抹除掉List<Object>后剩下的内容
+     * @param list
+     * @param workbook
+     * @return
+     */
+    Workbook maskParse(List<Object> list,Workbook workbook);
 }

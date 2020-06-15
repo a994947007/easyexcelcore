@@ -6,12 +6,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.easyexcel.annotation.Entity;
 import org.easyexcel.annotation.FieldName;
+import org.easyexcel.exception.UnsupportFileTypeException;
 import org.easyexcel.io.ExcelReader;
 import org.easyexcel.io.ExcelWriter;
 import org.easyexcel.io.XMLScanner;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -38,7 +40,7 @@ public abstract class AbstractEasyExcel {
     /**
      * 对象容器，存储格式：类名：对象列表
      */
-    protected Map<String, List<Object>> entitryContainer = new HashMap<String, List<Object>>();
+    protected Map<String, List<Object>> entityContainer = new HashMap<String, List<Object>>();
 
     /**
      * 用于扫描配置信息
@@ -128,7 +130,7 @@ public abstract class AbstractEasyExcel {
     protected void di() {
         for (Class<?> entityClass : entityClasses) {
             List<Object> list = excelParseByClass(entityClass, new DefaultlExcelParser());
-            entitryContainer.put(entityClass.getCanonicalName(), list);
+            entityContainer.put(entityClass.getCanonicalName(), list);
         }
     }
 
@@ -161,18 +163,81 @@ public abstract class AbstractEasyExcel {
         writer.write(excelParser.parse(list,writer.getWorkbook()));
     }
 
+    /**
+     * 用于判断一个类的某个方法是否被重写
+     * @return
+     */
+    private boolean isOverride(Class<?> clazz,String methodName,Class<?> ...parameter){
+        try {
+            clazz.getDeclaredMethod(methodName,parameter);
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 对比两个Entity对象的值是否相等
+     * @param deleteObj 待删除对象
+     * @param excelObj Excel中的对象
+     * @return
+     */
+    protected boolean equalObject(Object deleteObj,Object excelObj){
+        if(deleteObj == null && excelObj == null){
+            return true;
+        }
+        if(!deleteObj.getClass().getCanonicalName().equals(excelObj.getClass().getCanonicalName())){
+            return false;
+        }
+        //如果重写了equals方法，则直接使用equals方法比较
+        if(isOverride(deleteObj.getClass(),"equals",Object.class)){
+            return deleteObj.equals(excelObj);
+        }
+        //如果没有重写equals方法，则使用反射来对比属性值
+        Field fields1[] = deleteObj.getClass().getDeclaredFields();
+        Field fields2[] = excelObj.getClass().getDeclaredFields();
+        boolean flag = true;   //用于记录待删除对象的属性是否全为null
+        try {
+            for (int i = 0; i < fields1.length; i++) {
+                Field field1 = fields1[i];
+                Field field2 = fields2[i];
+                field1.setAccessible(true);
+                field2.setAccessible(true);
+                Object field1Result = field1.get(deleteObj);
+                Object field2Result = field2.get(excelObj);
+                if(field1Result == null){
+                    continue;
+                }
+                flag = false;
+                if(field2Result == null || !field1Result.equals(field2Result)){      //暂不支持对象中嵌套对象，只做java类型数据的比较
+                    return false;
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return flag == true ? false:true;
+    }
+
+    /**
+     * 从excel中删除对应的行
+     * @param list
+     * @param excelParser
+     */
     protected void removeFromExcel(List<Object> list,ExcelParser excelParser){
         if(list == null || list.size() == 0){
             return;
         }
-        Entity entity = list.get(0).getClass().getAnnotation(Entity.class);
+        Class<?> clazz = list.get(0).getClass();
+        Entity entity = clazz.getAnnotation(Entity.class);
         String excelPath = entity.path();
-        ExcelWriter reader = new ExcelWriter(excelPath);
-
+        ExcelWriter writer = new ExcelWriter(excelPath);
+        Workbook workbook = excelParser.maskParse(list,writer.getWorkbook());
+        writer.write(workbook);
     }
 
     /**
-     * Excel通用解析器
+     * Excel通用解析器，List<Object>转Workbook，WorkBook转List<Object>
      */
     protected static class DefaultlExcelParser implements ExcelParser {
         private class Header {
@@ -219,13 +284,6 @@ public abstract class AbstractEasyExcel {
             return new Header(firstRow);
         }
 
-        /**
-         * 将java类对应的excel表解析成对象列表
-         *
-         * @param workbook
-         * @param clazz
-         * @return
-         */
         public List<Object> parse(Workbook workbook, Class<?> clazz) {
             List<Object> list = new ArrayList<Object>();
             try{
@@ -251,12 +309,6 @@ public abstract class AbstractEasyExcel {
             return list;
         }
 
-        /**
-         * 将对象列表解析成Workbook表
-         * @param list
-         * @param workbook
-         * @return
-         */
         public Workbook parse(List<Object> list, Workbook workbook) {
             //根据list将Row添加到workbook最后
             //先创建sheet
@@ -285,6 +337,18 @@ public abstract class AbstractEasyExcel {
                 }
             }
             return workbook;
+        }
+
+        public Workbook maskParse(List<Object> list, Workbook workbook) {
+            Class<?> clazz = list.get(0).getClass();
+            Entity entity = clazz.getAnnotation(Entity.class);
+            Sheet sheet = null;
+            if(workbook.getNumberOfSheets() > 0){
+                sheet = workbook.getSheetAt(entity.sheet());
+            }else{
+                sheet = workbook.createSheet();
+            }
+            return null;
         }
 
         /**

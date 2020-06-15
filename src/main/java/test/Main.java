@@ -2,6 +2,7 @@ package test;
 
 import org.easyexcel.core.EasyExcel;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -20,6 +21,6 @@ public class Main {
         student.setId(3);
         student.setName("李四");
         student.setAge(20);
-        easyExcel.add(student);
+        easyExcel.remove(student);
     }
 }

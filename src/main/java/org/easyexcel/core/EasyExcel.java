@@ -1,13 +1,5 @@
 package org.easyexcel.core;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.easyexcel.annotation.FieldName;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class EasyExcel extends AbstractEasyExcel{
@@ -31,7 +23,7 @@ public class EasyExcel extends AbstractEasyExcel{
         String useCacheConfig = list.get(0);
         List<Object> results = null;
         if(useCacheConfig == null || "true".equals(useCacheConfig)){        //默认从缓存中读取
-            results =  entitryContainer.get(clazz.getCanonicalName());
+            results =  entityContainer.get(clazz.getCanonicalName());
         }
         return (List<T>) results;
     }
@@ -101,13 +93,13 @@ public class EasyExcel extends AbstractEasyExcel{
     public void addToCache(List<Object> list){
         List<String> configList = ApplicationConfig.getInstance().getConfig("properties_property_useCache");
         String useCacheConfig = configList.get(0);
-        if(useCacheConfig == null || "true".equals(useCacheConfig)){        //默认从缓存中读取
+        if(useCacheConfig == null || "true".equals(useCacheConfig)){
             if(list!= null && list.size() > 0){
                 Class<?> clazz = list.get(0).getClass();
-                if(entitryContainer.containsKey(clazz.getCanonicalName())){
-                    entitryContainer.get(clazz.getCanonicalName()).addAll(list);
+                if(entityContainer.containsKey(clazz.getCanonicalName())){
+                    entityContainer.get(clazz.getCanonicalName()).addAll(list);
                 }else{
-                    entitryContainer.put(clazz.getCanonicalName(),list);
+                    entityContainer.put(clazz.getCanonicalName(),list);
                 }
             }
         }
@@ -133,14 +125,31 @@ public class EasyExcel extends AbstractEasyExcel{
     }
 
     public void remove(List<Object> list,ExcelParser parser){
-
+        if(list == null || list.size() == 0){
+            return;
+        }
+        removeFromExcel(list,parser);
+        //removeFromCache(list);
     }
 
     /**
      * 从缓存中删除
      */
-    public void removeFromCache(Object o){
-
+    public void removeFromCache(List<Object> list){
+        List<String> configList = ApplicationConfig.getInstance().getConfig("properties_property_useCache");
+        String useCacheConfig = configList.get(0);
+        if(useCacheConfig == null || "true".equals(useCacheConfig)) {
+            String key = list.get(0).getClass().getCanonicalName();
+            List<Object> objects = entityContainer.get(key);
+            for (Object object : list) {
+                for (Iterator<Object> iterator = objects.iterator(); iterator.hasNext(); ) {
+                    Object next =  iterator.next();
+                    if(equalObject(object,next)){
+                        iterator.remove();
+                    }
+                }
+            }
+        }
     }
 
     /**

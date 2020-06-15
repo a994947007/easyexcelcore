@@ -67,13 +67,7 @@ public class ExcelWriter extends AbstractExcelOperator {
                     throw new UnsupportFileTypeException("不支持这种excel文件类型");
                 }
             }else{      //不存则创建一个新的
-                if(path.endsWith(".xlsx")){
-                    wb = new XSSFWorkbook();
-                }else if(path.endsWith(".xls")){
-                    wb = new HSSFWorkbook();
-                }else{
-                    throw  new  UnsupportFileTypeException("不支持这种excel文件类型");
-                }
+                wb = createWorkbook();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
