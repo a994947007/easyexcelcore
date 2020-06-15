@@ -167,7 +167,7 @@ public abstract class AbstractEasyExcel {
      * 用于判断一个类的某个方法是否被重写
      * @return
      */
-    private boolean isOverride(Class<?> clazz,String methodName,Class<?> ...parameter){
+    private static boolean isOverride(Class<?> clazz,String methodName,Class<?> ...parameter){
         try {
             clazz.getDeclaredMethod(methodName,parameter);
         } catch (NoSuchMethodException e) {
@@ -182,7 +182,7 @@ public abstract class AbstractEasyExcel {
      * @param excelObj Excel中的对象
      * @return
      */
-    protected boolean equalObject(Object deleteObj,Object excelObj){
+    protected static boolean equalObject(Object deleteObj,Object excelObj){
         if(deleteObj == null && excelObj == null){
             return true;
         }
@@ -320,7 +320,8 @@ public abstract class AbstractEasyExcel {
             }else{
                 sheet = workbook.createSheet();
             }
-            int rowIndex = sheet.getPhysicalNumberOfRows();
+            int lastRowNum = sheet.getLastRowNum();
+            int rowIndex = sheet.getLastRowNum() + 1;
             //创建Header
             Header header;
             if(existsHeader(sheet,clazz)){
@@ -342,13 +343,31 @@ public abstract class AbstractEasyExcel {
         public Workbook maskParse(List<Object> list, Workbook workbook) {
             Class<?> clazz = list.get(0).getClass();
             Entity entity = clazz.getAnnotation(Entity.class);
-            Sheet sheet = null;
-            if(workbook.getNumberOfSheets() > 0){
-                sheet = workbook.getSheetAt(entity.sheet());
-            }else{
-                sheet = workbook.createSheet();
+            Sheet sheet = workbook.getSheetAt(entity.sheet());
+            int firstRowNum = sheet.getFirstRowNum();
+            int lastRowNum = sheet.getLastRowNum();
+            Header header = getHeader(sheet.getRow(firstRowNum));
+            for (int i = firstRowNum + 1; i <= lastRowNum; i++) {
+                Row row = sheet.getRow(i);
+                if (row != null && row.getLastCellNum() >= 0) {
+                    Object o = parseObejct(header, row, clazz);
+                    for (Object object : list) {
+                        if(equalObject(o,object)){
+                            if(i < lastRowNum){
+                                sheet.removeRow(row);
+                                sheet.shiftRows(i + 1,lastRowNum, -1 );
+                                i--;
+                               // return workbook;
+                            } else{
+                                sheet.removeRow(row);
+                            }
+                            lastRowNum--;
+                            break;
+                        }
+                    }
+                }
             }
-            return null;
+            return workbook;
         }
 
         /**
