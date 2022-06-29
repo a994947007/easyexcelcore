@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
    <properties>
-       <poi.version>4.0.1</poi.version>
+       <poi.version>4.1.1</poi.version>
        <dom4j.version>1.6.1</dom4j.version>
    </properties>
 
